@@ -1,0 +1,8 @@
+[auth]
+disable_credentials = true
+
+[core]
+project = test
+
+[api_endpoint_overrides]
+spanner = http://spanner-emulator:9020/

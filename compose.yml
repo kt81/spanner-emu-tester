@@ -1,0 +1,33 @@
+services:
+  app:
+    build: .
+    depends_on:
+      spanner-emulator:
+        condition: service_started
+      gcloud-cli:
+        condition: service_completed_successfully
+    environment:
+      SPANNER_EMULATOR_HOST: spanner-emulator:9010
+    volumes:
+      - ./app:/go/src/app
+    working_dir: /go/src/app
+    command: [spanner-tester]
+  # spanner-cli -p test -i instance0 -d database0
+
+  spanner-emulator:
+    image: gcr.io/cloud-spanner-emulator/emulator:1.5.12
+
+  gcloud-cli:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    depends_on:
+      spanner-emulator:
+        condition: service_started
+    command: |
+      sh -c 'set -e
+             gcloud config configurations activate emulator
+             gcloud spanner instances list | grep -q instance0 \
+               || gcloud spanner instances create instance0 --config=config_emulator --description="Test Spanner" --nodes=1
+             gcloud spanner databases list --instance=instance0 | grep -q database0 \
+               || gcloud spanner databases create database0 --instance=instance0 --ddl="CREATE TABLE table (id INT64, name STRING(MAX)) PRIMARY KEY (id)"'
+    volumes:
+      - ./config_emulator:/root/.config/gcloud/configurations/config_emulator
