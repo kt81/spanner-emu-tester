@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/spanner"
-	"google.golang.org/api/iterator"
 )
 
 func main() {
@@ -19,18 +18,15 @@ func main() {
 		}
 
 		stmt := spanner.Statement{SQL: `SELECT count(1) FROM table`}
-		iter := client.Single().Query(ctx, stmt)
-		defer iter.Stop()
-		for {
-			_, err := iter.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				panic(err)
-			}
+		err = client.Single().Query(ctx, stmt).Do(
+			func(row *spanner.Row) error {
+				return nil
+			})
+		if err != nil {
+			panic(err)
 		}
 		client.Close()
+
 		if i%100 == 1 {
 			fmt.Println(time.Since(t))
 		}
