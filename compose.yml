@@ -15,7 +15,7 @@ services:
   # spanner-cli -p test -i instance0 -d database0
 
   spanner-emulator:
-    image: gcr.io/cloud-spanner-emulator/emulator:1.5.12
+    image: gcr.io/cloud-spanner-emulator/emulator:1.5.18
 
   gcloud-cli:
     image: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
